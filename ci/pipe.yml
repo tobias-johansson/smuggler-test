@@ -1,9 +1,42 @@
+resource_types:
+- name: smuggler
+  type: docker-image
+  source:
+    repository: redfactorlabs/concourse-smuggler-resource
+    tag: ubuntu-14.04
+
 resources:
 - name: smuggler-test
   type: git
   source:
     uri: https://github.com/tobias-johansson/smuggler-test
     branch: master
+
+- name: intermediates
+  type: smuggler
+  source:
+    # commands:
+    # - name: check
+    #   path: sh
+    #   args:
+    #     - -exc
+    #     - |
+    #       echo "${SMUGGLER_key1}"
+    #       echo "1.0.0" > ${SMUGGLER_OUTPUT_DIR}/versions
+    # - name: in
+    #   path: sh
+    #   args:
+    #     - -exc
+    #     - |
+    #       echo "${SMUGGLER_key1}"
+    #       echo "${SMUGGLER_SOURCES_DIR}"
+    #       ls -al "${SMUGGLER_SOURCES_DIR}"
+    #       echo "${SMUGGLER_OUTPUT_DIR}"
+    #       ls -al "${SMUGGLER_OUTPUT_DIR}"
+    #       cp "${SMUGGLER_SOURCES_DIR}/generated" "${SMUGGLER_OUTPUT_DIR}"
+    smuggler_params:
+    - key1: value1
+
 
 jobs:
 - name: generate
@@ -12,3 +45,8 @@ jobs:
     trigger: true
   - task: gen
     file: smuggler-test/ci/build.yml
+  - put: intermediates
+    params:
+      smuggler_params:
+        key1: other_value1
+      key3: value3
